@@ -2,53 +2,75 @@
 import pandas as pd
 
 def load_data(loadpath):
-    #reads a csv and return the dataframe
-    df = pd.read_csv(loadpath)
-    return df
+    """
+    The function reads a CSV file and returns the Dataframe
+
+    parameters:
+        loadpath(str): the function excpects a string which is the actusl path or name of the file
+
+    Returns:
+        a data frame is returned  
+
+    """
+    try:
+        df = pd.read_csv(loadpath)
+        print(f"Date is loaded sucessfully.Shape: {df.shape}")
+        return df
+    except FileNotFoundError:
+        print(f"Error: File '{loadpath} not found.")
+        return None
+
 
     
 
 def remove_missing(df):
-    #drops all rows with missing values
-    #null = df.isnull().sum()
-    #dropna() will automatically delete the nul values
-    return df.dropna()
+    
+    """
+    The function: removes the missing values found in the file.
+
+    Parameters: data frame recived and using the dropna() to automatically remove all empty values
+
+    Returns:
+        1-total number of missing values
+        2- a clean data with the number of complete columns and rows
+
+    """
+    total_nulls= df.isnull().sum().sum()
+
+    print(f"Total Nulls: {total_nulls}")
+
+    if total_nulls >0:
+        print("Nulls deleted:", total_nulls)
+        return df.dropna()
+    else:
+        print("No missing values were actually found!")
+        return df
+
 
     
 
 def show_summary(df):
+    """
+    The function: Prints the summary of the data
+
+    Parameters:
+        Receives the clean df 
+        Head(5) to print the first 5  elements(rows)
+        shape to print the overall clean shape aftrer removing the nulls
+
+    """
     #prints shape and the first five rows
     print("Titanic Shape:(columns ,rows)" ,df.shape)
     print(df.head(5))
 
+if __name__ == "__main__":
+    l = load_data("train.csv")
+    if l is not None:
+        c = remove_missing(l)
+        show_summary(c)
 
-l = load_data("train.csv")
-c = remove_missing(l)
-show_summary(c)
+#Day 5, REFACTORING THE CODE #
+#ADDING DOCSTRINGS -- descriptioon of what the method does
+#ERROR HANDLING : like what happen if file dont exist
+#MAIN BLOCK: proffesional way of running the code
 
-    
-'''  
-import pandas as pd
-
-def load_data(filepath):
-    return pd.read_csv(filepath)
-
-def remove_missing(df):
-    return df.dropna()
-
-def filter_adults(df, age_column, min_age=18):
-    return df[df[age_column] > min_age]
-
-def clean_income(df, income_column):
-    df[income_column] = df[income_column].str.replace(",", "").astype(float)
-    return df
-
-def run_pipeline(filepath):
-    df = load_data(filepath)
-    df = remove_missing(df)
-    df = filter_adults(df, "age")
-    df = clean_income(df, "income")
-    print(f"Pipeline complete. Shape: {df.shape}")
-    return df
-
-'''
