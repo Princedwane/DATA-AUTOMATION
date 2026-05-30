@@ -1,5 +1,8 @@
 
 import pandas as pd
+import mlflow
+
+mlflow.set_experiment("Titanic_Pipeline")
 
 def load_data(loadpath):
     """
@@ -14,7 +17,7 @@ def load_data(loadpath):
     """
     try:
         df = pd.read_csv(loadpath)
-        print(f"Date is loaded sucessfully.Shape: {df.shape}")
+        print(f"Data is loaded sucessfully.Shape: {df.shape}")
         return df
     except FileNotFoundError:
         print(f"Error: File '{loadpath} not found.")
@@ -66,8 +69,12 @@ def show_summary(df):
 if __name__ == "__main__":
     l = load_data("train.csv")
     if l is not None:
-        c = remove_missing(l)
-        show_summary(c)
+        with mlflow.start_run():
+            c = remove_missing(l)
+            mlflow.log_metric("rows_before", len(l))
+            mlflow.log_metric("rows_after", len(c))
+            mlflow.log_metric("rows_removed", len(l) - len(c))
+            show_summary(c)
 
 #Day 5, REFACTORING THE CODE #
 #ADDING DOCSTRINGS -- descriptioon of what the method does
