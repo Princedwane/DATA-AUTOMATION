@@ -5,6 +5,7 @@ mlflow.set_tracking_uri('sqlite:///mlflow.db')
 runs = mlflow.search_runs(experiment_names=['Titanic_Pipeline'])
 
 print(runs[[
+    'tags.mlflow.runName',
     'start_time',
     'metrics.accuracy',
     'metrics.rows_before',

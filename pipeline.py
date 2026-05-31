@@ -66,11 +66,14 @@ def show_summary(df):
     print("Titanic Shape:(columns ,rows)" ,df.shape)
     print(df.head(5))
 
-def train_model(df):
+def train_model(df,features ,test_size=0.2):
     """
     Trains a Logistic Regression model on the Titanic dataset.
     Parameters:
         df: the clean dataframe received from remove_missing
+        features: list of column names to use for training
+        test_size: proportion of data to use for testing (default 0.2)
+
     Returns:
         the trained model and its accuracy score
     """
@@ -78,10 +81,10 @@ def train_model(df):
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import accuracy_score
 
-    X = df[["Pclass", "Age", "Fare"]]
+    X = df[features]
     y = df["Survived"]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size)
     #train test splits data into 2 parts, 80%for training model
     #20% for testing how well it learned
     #test_size =0.2 mean 20% foes to testing 
@@ -97,29 +100,54 @@ def train_model(df):
 if __name__ == "__main__":
     l = load_data("train.csv")
     if l is not None:
-        with mlflow.start_run():
-            c = remove_missing(l)
+        c = remove_missing(l)
+        show_summary(c)
 
+        # Run 1 — Basic features
+        with mlflow.start_run(run_name="Run1_Basic"):
+            features = ["Pclass", "Age", "Fare"]
+            model, accuracy = train_model(c, features, test_size=0.2)
+            mlflow.log_param("model_type", "LogisticRegression")
+            mlflow.log_param("features", str(features))
+            mlflow.log_param("test_size", 0.2)
             mlflow.log_metric("rows_before", len(l))
             mlflow.log_metric("rows_after", len(c))
-            mlflow.log_metric("rows_removed", len(l) - len(c))
-            
-            model , accuracy = train_model(c)
+            mlflow.log_metric("accuracy", accuracy)
+            mlflow.sklearn.log_model(model, "model")
+            print(f"\nRun 1 Accuracy: {accuracy}")
 
-            mlflow.log_param("model_type", "LogisticRegression") #logs the setting 
+        # Run 2 — Add Sex column
+        with mlflow.start_run(run_name="Run2_WithSex"):
+            c["Sex_encoded"] = c["Sex"].map({"male": 0, "female": 1})
+            features = ["Pclass", "Age", "Fare", "Sex_encoded"]
+            model, accuracy = train_model(c, features, test_size=0.2)
+            mlflow.log_param("model_type", "LogisticRegression")
+            mlflow.log_param("features", str(features))
             mlflow.log_param("test_size", 0.2)
-            mlflow.log_metric("accuracy", accuracy)#logs the accuracy number
+            mlflow.log_metric("rows_before", len(l))
+            mlflow.log_metric("rows_after", len(c))
+            mlflow.log_metric("accuracy", accuracy)
+            mlflow.sklearn.log_model(model, "model")
+            print(f"\nRun 2 Accuracy: {accuracy}")
 
-            mlflow.sklearn.log_model(model , "model") #saving the actual trained modelinside mlflow
-
-            show_summary(c)
-            print(f"Model Accuracy: {accuracy}")
+        # Run 3 — More features, different test size
+        with mlflow.start_run(run_name="Run3_MoreFeatures"):
+            features = ["Pclass", "Age", "Fare", "Sex_encoded", "SibSp", "Parch"]
+            model, accuracy = train_model(c, features, test_size=0.3)
+            mlflow.log_param("model_type", "LogisticRegression")
+            mlflow.log_param("features", str(features))
+            mlflow.log_param("test_size", 0.3)
+            mlflow.log_metric("rows_before", len(l))
+            mlflow.log_metric("rows_after", len(c))
+            mlflow.log_metric("accuracy", accuracy)
+            mlflow.sklearn.log_model(model, "model")
+            print(f"\nRun 3 Accuracy: {accuracy}")
 
             
           
 #Day 5, REFACTORING THE CODE #
 #ADDING DOCSTRINGS -- descriptioon of what the method does
-#ERROR HANDLING : like what happen if file dont exist
+#ERROR HANDLING : like what happen if file dont existpython
 #MAIN BLOCK: proffesional way of running the code
 
 
