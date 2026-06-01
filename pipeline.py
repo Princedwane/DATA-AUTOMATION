@@ -1,6 +1,9 @@
 
 import pandas as pd
 import mlflow
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 mlflow.set_experiment("Titanic_Pipeline")
 
@@ -20,11 +23,8 @@ def load_data(loadpath):
         print(f"Data is loaded sucessfully.Shape: {df.shape}")
         return df
     except FileNotFoundError:
-        print(f"Error: File '{loadpath} not found.")
+        print(f"Error: File '{loadpath}' not found.")
         return None
-
-
-    
 
 def remove_missing(df):
     
@@ -48,9 +48,6 @@ def remove_missing(df):
     else:
         print("No missing values were actually found!")
         return df
-
-
-    
 
 def show_summary(df):
     """
@@ -77,17 +74,11 @@ def train_model(df,features ,test_size=0.2):
     Returns:
         the trained model and its accuracy score
     """
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.model_selection import train_test_split
-    from sklearn.metrics import accuracy_score
-
+    
     X = df[features]
     y = df["Survived"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size)
-    #train test splits data into 2 parts, 80%for training model
-    #20% for testing how well it learned
-    #test_size =0.2 mean 20% foes to testing 
      
     model = LogisticRegression()
     model.fit(X_train, y_train) #where the actual learning happen
@@ -95,7 +86,7 @@ def train_model(df,features ,test_size=0.2):
     predictions = model.predict(X_test) #model predicts on unseen data
     accuracy = accuracy_score(y_test, predictions) #comparres rpredictions against real answers and provide percentage of accuracy
 
-    return model, accuracy # returns the trained model and its accuracy scoreh
+    return model, accuracy
 
 if __name__ == "__main__":
     l = load_data("train.csv")
@@ -142,12 +133,5 @@ if __name__ == "__main__":
             mlflow.log_metric("accuracy", accuracy)
             mlflow.sklearn.log_model(model, "model")
             print(f"\nRun 3 Accuracy: {accuracy}")
-
-            
-          
-#Day 5, REFACTORING THE CODE #
-#ADDING DOCSTRINGS -- descriptioon of what the method does
-#ERROR HANDLING : like what happen if file dont existpython
-#MAIN BLOCK: proffesional way of running the code
 
 

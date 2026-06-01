@@ -1,0 +1,23 @@
+artifact_path: /home/princedwane/Desktop/DATA_AUTOMATION/mlruns/1/models/m-3c0d59cebcd1488ea0887f98e77a4402/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.3
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.12.0
+model_id: m-3c0d59cebcd1488ea0887f98e77a4402
+model_size_bytes: 891
+model_uuid: m-3c0d59cebcd1488ea0887f98e77a4402
+prompts: null
+run_id: 30126b710ea54641b0a4d1bbd08e086c
+utc_time_created: '2026-06-01 09:55:20.611368'

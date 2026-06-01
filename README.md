@@ -74,6 +74,11 @@ Run3 achieved the highest accuracy by using more features.
 - MLflow allowed us to compare all three runs in one table without
   manually recording any results. This is the power of experiment tracking.
 
+  - train_test_split randomly shuffles data on every run, meaning accuracy
+  can change between runs even with identical code and data. This is why
+  MLflow experiment tracking is essential — it records every run permanently
+  so you can distinguish real improvements from random variation.
+
 ---
 
 ## Project Structure
