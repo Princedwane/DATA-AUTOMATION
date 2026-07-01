@@ -1,1 +1,5 @@
 venv/
+loan_approval_dataset.csv
+phase2_output/
+reference notes/
+.vscode/
