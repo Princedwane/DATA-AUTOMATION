@@ -5,3 +5,4 @@ reference notes/
 .vscode/
 mlflow.db
 train.csv
+mlruns/
