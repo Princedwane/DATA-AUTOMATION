@@ -2,6 +2,20 @@ import pandas as pd
 import os
 from datetime import datetime
 import sweetviz as sv
+import pandera.pandas as pa
+
+# Schema defining validation rules for the loan dataset
+# Applied to raw data BEFORE transformation and encoding
+loan_schema = pa.DataFrameSchema(
+    {
+    " cibil_score": pa.Column(int, pa.Check.between(300, 900)),    # credit score range in India
+    " income_annum": pa.Column(int, pa.Check.gt(0)),               # income must be positive
+    " loan_amount": pa.Column(int, pa.Check.gt(0)),                # loan amount must be positive
+    " loan_term": pa.Column(int, pa.Check.gt(0)),                  # term in months, must be positive
+    " loan_status": pa.Column(str, pa.Check.isin([" Approved", " Rejected"])),  # only valid statuses
+    " no_of_dependents": pa.Column(int, pa.Check.ge(0)),           # dependents can be zero
+}
+)
 
 def ingest_data(filepath):
     """
@@ -25,38 +39,28 @@ def ingest_data(filepath):
 
 def validate_data(df):
     """
-    Validates the incoming data before processing.
+    Validates the incoming data against the loan schema.
     Parameters:
         df: raw DataFrame from ingest_data
     Returns:
         DataFrame if valid, None if validation fails
     """
-    print(f"\n[VALIDATE] Running validation checks...")
+    print(f"\n[VALIDATE] Running schema validation...")
 
     # Check 1 — no empty dataframe
     if df.empty:
         print("[VALIDATE] FAILED: DataFrame is empty.")
         return None
-    
-     # Check 2 — required columns exist
-    required_columns = [' cibil_score', ' income_annum', ' loan_status', ' loan_amount']
-    for col in required_columns:
-        if col not in df.columns:
-            print(f"[VALIDATE] FAILED: Missing column '{col}'")
-            return None
-        
-    # Check 3 — cibil_score must be positive
-    if (df[' cibil_score'] < 0).any():
-        print("[VALIDATE] FAILED: cibil_score contains negative values.")
+
+    # Check 2 — validate against Pandera schema
+    try:
+        loan_schema.validate(df, lazy=True)
+        print("[VALIDATE] All schema checks passed. Data is clean.")
+        return df
+    except pa.errors.SchemaErrors as e:
+        print("[VALIDATE] FAILED: Schema validation errors found.")
+        print(e.failure_cases) # for debugging
         return None
-    
-     # Check 4 — income must be greater than zero
-    if (df[' income_annum'] <= 0).any():
-        print("[VALIDATE] FAILED: income_annum contains zero or negative values.")
-        return None
-    
-    print("[VALIDATE] All checks passed. Data is clean.")
-    return df
 
 def transform_data(df):
     """
@@ -197,3 +201,11 @@ if __name__ == "__main__":
                 generate_eda_report(transformed)
                 
                 print("\n[PIPELINE] All stages completed successfully.")
+
+# TEST BLOCK — uncomment to test schema validation with bad data
+    # print("\n--- TESTING VALIDATION WITH BAD DATA ---")
+    # bad_df = raw.copy()
+    # bad_df[' cibil_score'] = -500
+    # test_result = validate_data(bad_df)
+    # if test_result is None:
+    #     print("--- VALIDATION CORRECTLY REJECTED BAD DATA ---")
