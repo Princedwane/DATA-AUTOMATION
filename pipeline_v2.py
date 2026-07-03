@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from datetime import datetime
+import sweetviz as sv
 
 def ingest_data(filepath):
     """
@@ -146,6 +147,28 @@ def generate_report(df, output_folder="phase2_output"):
     for line in report_lines:
         print(line)
 
+def generate_eda_report(df, output_folder="phase2_output"):
+    """
+    Generates an automated EDA report using sweetviz.
+    Parameters:
+        df: transformed DataFrame
+        output_folder: folder to save the HTML report
+    Returns:
+        None
+    """
+    print(f"\n[EDA] Generating automated EDA report...")
+    
+    os.makedirs(output_folder, exist_ok=True)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_path = os.path.join(output_folder, f"eda_report_{timestamp}.html")
+    
+    report = sv.analyze(df)
+    report.show_html(report_path, open_browser=False)
+    
+    print(f"[EDA] Report saved to: {report_path}")
+    print(f"[EDA] Open the HTML file in your browser to view the full report.")
+
 if __name__ == "__main__":
     
     # Stage 1 — Ingest
@@ -171,5 +194,6 @@ if __name__ == "__main__":
                 
                 # Stage 5 — Report
                 generate_report(transformed)
+                generate_eda_report(transformed)
                 
                 print("\n[PIPELINE] All stages completed successfully.")
