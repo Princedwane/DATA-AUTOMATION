@@ -6,3 +6,4 @@ reference notes/
 mlflow.db
 train.csv
 mlruns/
+__pycache__/
