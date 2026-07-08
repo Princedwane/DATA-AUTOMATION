@@ -7,3 +7,4 @@ mlflow.db
 train.csv
 mlruns/
 __pycache__/
+prefect.db*
